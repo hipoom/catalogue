@@ -2,6 +2,7 @@ package com.hipoom.file.catalogue;
 
 import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.hipoom.Files;
@@ -130,6 +131,31 @@ public class Catalogue {
         return new File(filePath);
     }
 
+    /**
+     * 获取 workspace 中有哪些 business。
+     * 如果 workspace 不是一个由 Catalogue 管理的文件夹，则返回空数组。
+     */
+    public synchronized static List<String> getAllBusinessName(String workspace) {
+        List<String> names = new LinkedList<>();
+
+        // 加载 catalogue.txt 文件
+        File catalogue = new File(workspace, CATALOGUE_FILE_NAME);
+        CatalogueVO vo = loadCatalogue(catalogue);
+        if (vo == null) {
+            return names;
+        }
+
+        if (vo.mapping == null) {
+            return names;
+        }
+
+        for (Mapping mapping : vo.mapping) {
+            names.add(mapping.business);
+        }
+
+        return names;
+    }
+
 
 
     /* ======================================================= */
@@ -138,7 +164,7 @@ public class Catalogue {
 
     /**
      * 读取 catalogue.txt 文件，并解析为 CatalogueVO 对象。
-     * @return 如果文件的内容是空，或者解析内容失败，则返回 null；否则，返回对应的 CatalogueVO.
+     * @return 如果文件不存在，返回 null； 如果文件的内容是空，或者解析内容失败，则返回 null；否则，返回对应的 CatalogueVO.
      */
     private static CatalogueVO loadCatalogue(File catalogueFile) {
         String txt = Files.readText(catalogueFile);
